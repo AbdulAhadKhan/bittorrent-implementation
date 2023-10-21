@@ -85,5 +85,6 @@ mod bencode_tests {
     #[test]
     fn decode_bencode_integer_error() {
         assert!(decode_bencoded_value("ie").is_err());
+        assert!(decode_bencoded_value("i-e").is_err());
     }
 }
