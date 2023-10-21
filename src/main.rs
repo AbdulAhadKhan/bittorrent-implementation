@@ -11,13 +11,6 @@ fn decode_bencoded_value(encoded_value: &str) -> Result<(serde_json::Value, &str
             match encoded_value.split_once(":") {
                 Some((size, rest)) => {
                     let size = size.parse::<usize>()?;
-                    if size > rest.len() {
-                        return Err(anyhow!(
-                            "Specified string '{}' is greater than size of {}",
-                            rest,
-                            size
-                        ));
-                    }
                     let (word, rest) = rest.split_at(size);
                     anyhow::Ok((json!(word), rest))
                 }
