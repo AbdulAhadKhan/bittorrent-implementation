@@ -11,7 +11,7 @@ fn main() {
     if command == "decode" {
         let encoded_value = &args[2];
         let decoded_value = decode_bencoded_value(encoded_value).unwrap();
-        println!("{}", decoded_value.1.to_string());
+        println!("{}", decoded_value.0.to_string());
     } else {
         println!("unknown command: {}", args[1])
     }
