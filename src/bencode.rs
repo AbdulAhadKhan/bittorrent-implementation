@@ -1,6 +1,5 @@
 use anyhow::anyhow;
 use serde_json;
-use serde_json::json;
 
 pub fn decode_bencoded_value(
     encoded_value: &str,
@@ -19,7 +18,7 @@ pub fn decode_bencoded_value(
                         ));
                     }
                     let (word, rest) = rest.split_at(size);
-                    anyhow::Ok((json!(word), rest))
+                    anyhow::Ok((word.into(), rest))
                 }
                 None => Err(anyhow!("Invalid bencode syntax: {}", encoded_value)),
             }
@@ -29,10 +28,22 @@ pub fn decode_bencoded_value(
             match encoded_value.split_at(1).1.split_once("e") {
                 Some((number, rest)) => {
                     let number = number.parse::<i64>()?;
-                    anyhow::Ok((json!(number), rest))
+                    anyhow::Ok((number.into(), rest))
                 }
                 None => Err(anyhow!("Invalid bencode syntax: {}", encoded_value)),
             }
+        }
+        Some('l') => {
+            // Example: l5:helloi20ee -> ["hello", 20]
+            let mut jsonable_list = Vec::new();
+            let mut rest = encoded_value.split_at(1).1;
+            while !rest.is_empty() && !rest.starts_with("e") {
+                let (value, remaining) = decode_bencoded_value(rest)?;
+
+                rest = remaining;
+                jsonable_list.push(value);
+            }
+            anyhow::Ok((jsonable_list.into(), &rest[1..]))
         }
         _ => Err(anyhow!("Unhandled encoded value: {}", encoded_value)),
     }
@@ -72,5 +83,29 @@ mod bencode_tests {
     fn decode_bencode_integer_error() {
         assert!(decode_bencoded_value("ie").is_err());
         assert!(decode_bencoded_value("i-e").is_err());
+    }
+
+    #[test]
+    fn decode_bencoded_list() {
+        let test_1_bencode = "l5:hello5:worlde";
+        let test_1_results = json!(["hello", "world"]);
+        assert_eq!(
+            decode_bencoded_value(test_1_bencode).unwrap(),
+            (test_1_results, "")
+        );
+
+        let test_2_bencode = "li20ei-15ee";
+        let test_2_results = json!([20, -15]);
+        assert_eq!(
+            decode_bencoded_value(test_2_bencode).unwrap(),
+            (test_2_results, "")
+        );
+
+        let test_3_bencode = "l5:helloi-15ee";
+        let test_3_results = json!(["hello", -15]);
+        assert_eq!(
+            decode_bencoded_value(test_3_bencode).unwrap(),
+            (test_3_results, "")
+        );
     }
 }
