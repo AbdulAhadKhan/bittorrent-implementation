@@ -1,6 +1,5 @@
 use anyhow::anyhow;
 use serde_json;
-use serde_json::json;
 
 pub fn decode_bencoded_value(
     encoded_value: &str,
@@ -19,7 +18,7 @@ pub fn decode_bencoded_value(
                         ));
                     }
                     let (word, rest) = rest.split_at(size);
-                    anyhow::Ok((json!(word), rest))
+                    anyhow::Ok((word.into(), rest))
                 }
                 None => Err(anyhow!("Invalid bencode syntax: {}", encoded_value)),
             }
@@ -29,7 +28,7 @@ pub fn decode_bencoded_value(
             match encoded_value.split_at(1).1.split_once("e") {
                 Some((number, rest)) => {
                     let number = number.parse::<i64>()?;
-                    anyhow::Ok((json!(number), rest))
+                    anyhow::Ok((number.into(), rest))
                 }
                 None => Err(anyhow!("Invalid bencode syntax: {}", encoded_value)),
             }
@@ -39,12 +38,12 @@ pub fn decode_bencoded_value(
             let mut jsonable_list = Vec::new();
             let mut rest = encoded_value.split_at(1).1;
             while !rest.is_empty() && !rest.starts_with("e") {
-                let (value, remaining) = decode_bencoded_value(encoded_value)?;
+                let (value, remaining) = decode_bencoded_value(rest)?;
 
                 rest = remaining;
                 jsonable_list.push(value);
             }
-            anyhow::Ok((json!(jsonable_list), rest))
+            anyhow::Ok((jsonable_list.into(), &rest[1..]))
         }
         _ => Err(anyhow!("Unhandled encoded value: {}", encoded_value)),
     }
