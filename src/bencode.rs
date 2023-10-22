@@ -102,11 +102,11 @@ mod bencode_tests {
             (test_2_results, "")
         );
 
-        // let test_3_bencode = "l5:helloi-15ee";
-        // let test_3_results = json!(["hello", -15]);
-        // assert_eq!(
-        //     decode_bencoded_value(test_3_bencode).unwrap(),
-        //     (test_3_results, "")
-        // );
+        let test_3_bencode = "l5:helloi-15ee";
+        let test_3_results = json!(["hello", -15]);
+        assert_eq!(
+            decode_bencoded_value(test_3_bencode).unwrap(),
+            (test_3_results, "")
+        );
     }
 }
