@@ -126,4 +126,23 @@ mod bencode_tests {
             (test_3_results, "")
         );
     }
+
+    #[test]
+    fn decode_bencoded_dict() {
+        let bencode = "d5:helloi52ee";
+        let results = json!({"hello": 52});
+        decode_bencode_test_wrapper(bencode, (results, ""));
+
+        let bencode = "d3:foo3:bar5:helloi52ei10ei-5ee";
+        let results = json!({"foo": "bar", "hello": 52, "10": -5});
+        decode_bencode_test_wrapper(bencode, (results, ""));
+
+        let bencode = "d5:helloi52eei1e";
+        let results = json!({"hello": 52});
+        decode_bencode_test_wrapper(bencode, (results, "i1e"));
+
+        let bencode = "de";
+        let results = json!({});
+        decode_bencode_test_wrapper(bencode, (results, ""));
+    }
 }
