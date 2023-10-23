@@ -45,6 +45,24 @@ pub fn decode_bencoded_value(
             }
             anyhow::Ok((jsonable_list.into(), &rest[1..]))
         }
+        Some('d') => {
+            // Example: d5:hello5world7:versioni15ee -> {"hello": "world", "version": 15}
+            let mut jsonable_dict = serde_json::Map::new();
+            let mut rest = encoded_value.split_at(1).1;
+            while !rest.is_empty() && !rest.starts_with("e") {
+                let (key, remaining) = decode_bencoded_value(rest)?;
+                let (value, remaining) = decode_bencoded_value(remaining)?;
+
+                let key = match key {
+                    serde_json::value::Value::String(key) => key,
+                    _ => key.to_string(),
+                };
+
+                rest = remaining;
+                jsonable_dict.insert(key, value);
+            }
+            anyhow::Ok((jsonable_dict.into(), &rest[1..]))
+        }
         _ => Err(anyhow!("Unhandled encoded value: {}", encoded_value)),
     }
 }
@@ -87,25 +105,35 @@ mod bencode_tests {
 
     #[test]
     fn decode_bencoded_list() {
-        let test_1_bencode = "l5:hello5:worlde";
-        let test_1_results = json!(["hello", "world"]);
-        assert_eq!(
-            decode_bencoded_value(test_1_bencode).unwrap(),
-            (test_1_results, "")
-        );
+        let bencode = "l5:hello5:worlde";
+        let results = json!(["hello", "world"]);
+        decode_bencode_test_wrapper(bencode, (results, ""));
 
-        let test_2_bencode = "li20ei-15ee";
-        let test_2_results = json!([20, -15]);
-        assert_eq!(
-            decode_bencoded_value(test_2_bencode).unwrap(),
-            (test_2_results, "")
-        );
+        let bencode = "li20ei-15ee";
+        let results = json!([20, -15]);
+        decode_bencode_test_wrapper(bencode, (results, ""));
 
-        let test_3_bencode = "l5:helloi-15ee";
-        let test_3_results = json!(["hello", -15]);
-        assert_eq!(
-            decode_bencoded_value(test_3_bencode).unwrap(),
-            (test_3_results, "")
-        );
+        let bencode = "l5:helloi-15ee";
+        let results = json!(["hello", -15]);
+        decode_bencode_test_wrapper(bencode, (results, ""));
+    }
+
+    #[test]
+    fn decode_bencoded_dict() {
+        let bencode = "d5:helloi52ee";
+        let results = json!({"hello": 52});
+        decode_bencode_test_wrapper(bencode, (results, ""));
+
+        let bencode = "d3:foo3:bar5:helloi52ei10ei-5ee";
+        let results = json!({"foo": "bar", "hello": 52, "10": -5});
+        decode_bencode_test_wrapper(bencode, (results, ""));
+
+        let bencode = "d5:helloi52eei1e";
+        let results = json!({"hello": 52});
+        decode_bencode_test_wrapper(bencode, (results, "i1e"));
+
+        let bencode = "de";
+        let results = json!({});
+        decode_bencode_test_wrapper(bencode, (results, ""));
     }
 }
