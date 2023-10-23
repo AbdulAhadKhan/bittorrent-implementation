@@ -105,26 +105,17 @@ mod bencode_tests {
 
     #[test]
     fn decode_bencoded_list() {
-        let test_1_bencode = "l5:hello5:worlde";
-        let test_1_results = json!(["hello", "world"]);
-        assert_eq!(
-            decode_bencoded_value(test_1_bencode).unwrap(),
-            (test_1_results, "")
-        );
+        let bencode = "l5:hello5:worlde";
+        let results = json!(["hello", "world"]);
+        decode_bencode_test_wrapper(bencode, (results, ""));
 
-        let test_2_bencode = "li20ei-15ee";
-        let test_2_results = json!([20, -15]);
-        assert_eq!(
-            decode_bencoded_value(test_2_bencode).unwrap(),
-            (test_2_results, "")
-        );
+        let bencode = "li20ei-15ee";
+        let results = json!([20, -15]);
+        decode_bencode_test_wrapper(bencode, (results, ""));
 
-        let test_3_bencode = "l5:helloi-15ee";
-        let test_3_results = json!(["hello", -15]);
-        assert_eq!(
-            decode_bencoded_value(test_3_bencode).unwrap(),
-            (test_3_results, "")
-        );
+        let bencode = "l5:helloi-15ee";
+        let results = json!(["hello", -15]);
+        decode_bencode_test_wrapper(bencode, (results, ""));
     }
 
     #[test]
