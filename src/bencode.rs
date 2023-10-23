@@ -45,6 +45,24 @@ pub fn decode_bencoded_value(
             }
             anyhow::Ok((jsonable_list.into(), &rest[1..]))
         }
+        Some('d') => {
+            // Example: d5:hello5world7:versioni15ee -> {"hello": "world", "version": 15}
+            let mut jsonable_dict = serde_json::Map::new();
+            let mut rest = encoded_value.split_at(1).1;
+            while !rest.is_empty() && !rest.starts_with("e") {
+                let (key, remaining) = decode_bencoded_value(rest)?;
+                let (value, remaining) = decode_bencoded_value(remaining)?;
+
+                let key = match key {
+                    serde_json::value::Value::String(key) => key,
+                    _ => key.to_string(),
+                };
+
+                rest = remaining;
+                jsonable_dict.insert(key, value);
+            }
+            anyhow::Ok((jsonable_dict.into(), &rest[1..]))
+        }
         _ => Err(anyhow!("Unhandled encoded value: {}", encoded_value)),
     }
 }
