@@ -1,4 +1,5 @@
 use bittorrent_starter_rust::bencode::decode_bencoded_value;
+use bittorrent_starter_rust::torrent::Torrent;
 use clap::Parser;
 
 #[derive(Parser, Debug)]
@@ -22,7 +23,7 @@ fn main() {
             request_bencode_decode(bencode);
         }
         Args::Info { torrent_file } => {
-            println!("{:?}", torrent_file);
+            Torrent::new(torrent_file);
         }
     }
 }
