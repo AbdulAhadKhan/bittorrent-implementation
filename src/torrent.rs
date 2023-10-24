@@ -31,4 +31,11 @@ impl Torrent {
         hasher.update(bencode);
         hasher.finalize().into()
     }
+
+    pub fn get_pieces_hashes(&self) -> Vec<Vec<u8>> {
+        let hashes_iterator = self.info.pieces.chunks(20);
+        let hashes: Vec<Vec<u8>> = hashes_iterator.map(|hash| hash.into()).collect();
+
+        return hashes;
+    }
 }
