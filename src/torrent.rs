@@ -1,32 +1,23 @@
-// TODO: remove allow dead_code
+use serde::Deserialize;
 
-#[derive(Debug)]
-#[allow(dead_code)]
+#[derive(Debug, Deserialize)]
 pub struct Torrent {
-    announce: String,
-    info: Info,
+    pub announce: String,
+    pub info: Info,
 }
 
-#[derive(Debug)]
-#[allow(dead_code)]
-struct Info {
-    length: u32,
-    name: String,
-    piece_length: u32,
-    pieces: String,
+#[derive(Debug, Deserialize)]
+pub struct Info {
+    pub length: usize,
+    pub name: String,
+    #[serde(rename = "piece length")]
+    pub piece_length: usize,
 }
 
 impl Torrent {
-    pub fn new(path: &str) -> Torrent {
-        println!("{:?}", path);
-        return Torrent {
-            announce: "Hello".to_string(),
-            info: Info {
-                length: 3,
-                name: "World".to_string(),
-                piece_length: 32,
-                pieces: "hash".to_string(),
-            },
-        };
+    pub fn info(path: &str) -> Result<Torrent, anyhow::Error> {
+        let file = std::fs::read(path)?;
+        let torrent_info: Torrent = serde_bencode::from_bytes(&file)?;
+        return anyhow::Ok(torrent_info);
     }
 }

@@ -14,6 +14,12 @@ fn request_bencode_decode(encoded_value: &str) {
     println!("{}", decoded_value.0.to_string());
 }
 
+fn request_torrent_info(path: &str) {
+    let torrent_info = Torrent::info(path).unwrap();
+    println!("Tracker URL: {}", torrent_info.announce);
+    println!("Length: {}", torrent_info.info.length);
+}
+
 // Usage: your_bittorrent.sh decode "<encoded_value>"
 fn main() {
     let arg = Args::parse();
@@ -23,7 +29,7 @@ fn main() {
             request_bencode_decode(bencode);
         }
         Args::Info { torrent_file } => {
-            Torrent::new(torrent_file);
+            request_torrent_info(torrent_file);
         }
     }
 }
