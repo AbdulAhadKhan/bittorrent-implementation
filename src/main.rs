@@ -1,6 +1,4 @@
-mod bencode;
-
-use bencode::decode_bencoded_value;
+use bittorrent_starter_rust::bencode::decode_bencoded_value;
 use clap::Parser;
 
 #[derive(Parser, Debug)]
