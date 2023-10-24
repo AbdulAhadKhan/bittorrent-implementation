@@ -15,9 +15,13 @@ fn request_bencode_decode(encoded_value: &str) {
 }
 
 fn request_torrent_info(path: &str) {
-    let torrent_info = Torrent::info(path).unwrap();
+    let torrent_info = Torrent::new(path).unwrap();
+    let info_hash = torrent_info.get_info_hash();
+    let info_hash = hex::encode(info_hash);
+
     println!("Tracker URL: {}", torrent_info.announce);
     println!("Length: {}", torrent_info.info.length);
+    println!("Info Hash: {}", info_hash);
 }
 
 // Usage: your_bittorrent.sh decode "<encoded_value>"
