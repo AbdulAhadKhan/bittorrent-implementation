@@ -22,3 +22,15 @@ pub fn generate_uuid() -> String {
 
     hash[..20].to_string()
 }
+
+pub fn byte_url_encode(byte_array: &[u8]) -> String {
+    let mut encoded_bytes = String::with_capacity(byte_array.len() * 3);
+
+    for &byte in byte_array {
+        let encoded_byte = hex::encode(&[byte]);
+        encoded_bytes.push('%');
+        encoded_bytes.push_str(&encoded_byte);
+    }
+
+    encoded_bytes
+}
