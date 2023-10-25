@@ -50,9 +50,16 @@ async fn request_peers_info(torrent_file: &str) {
         uploaded: 0,
     };
 
-    tracker_request
+    let tracker_response = tracker_request
         .get(announce_url, byte_url_encode(&info_hash).as_str())
-        .await;
+        .await
+        .unwrap();
+
+    let addresses = tracker_response.get_peers_address().unwrap();
+
+    for (ip, port) in addresses {
+        println!("{}:{}", ip, port);
+    }
 }
 
 #[tokio::main]
