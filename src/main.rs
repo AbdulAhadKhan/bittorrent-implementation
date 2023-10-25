@@ -7,6 +7,7 @@ use clap::Parser;
 enum Args {
     Decode { bencode: String },
     Info { torrent_file: String },
+    Peers { torrent_file: String },
 }
 
 fn request_bencode_decode(encoded_value: &str) {
@@ -31,6 +32,8 @@ fn request_torrent_info(path: &str) {
     }
 }
 
+fn request_peers_info(torrent_file: &str) {}
+
 // Usage: your_bittorrent.sh decode "<encoded_value>"
 fn main() {
     let arg = Args::parse();
@@ -41,6 +44,9 @@ fn main() {
         }
         Args::Info { torrent_file } => {
             request_torrent_info(torrent_file);
+        }
+        Args::Peers { torrent_file } => {
+            request_peers_info(torrent_file);
         }
     }
 }
