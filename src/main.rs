@@ -1,5 +1,6 @@
 use bittorrent_starter_rust::bencode::decode_bencoded_value;
 use bittorrent_starter_rust::torrent::Torrent;
+use bittorrent_starter_rust::utils::generate_uuid;
 use clap::Parser;
 
 #[derive(Parser, Debug)]
@@ -32,7 +33,11 @@ fn request_torrent_info(path: &str) {
     }
 }
 
-fn request_peers_info(torrent_file: &str) {}
+fn request_peers_info(torrent_file: &str) {
+    let uuid = generate_uuid();
+
+    println!("{}", uuid);
+}
 
 // Usage: your_bittorrent.sh decode "<encoded_value>"
 fn main() {
