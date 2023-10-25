@@ -20,7 +20,7 @@ pub struct TrackerResponse {
 
 impl TrackerRequest {
     pub async fn get(&self, url: &str, info_hash: &str) -> Result<TrackerResponse, anyhow::Error> {
-        let params = serde_urlencoded::to_string(&self).unwrap();
+        let params = serde_urlencoded::to_string(&self)?;
         let tracker_url = format!("{}?info_hash={}&{}", url, info_hash, params);
 
         let response = reqwest::get(&tracker_url).await?.bytes().await?;
