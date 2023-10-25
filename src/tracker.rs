@@ -1,3 +1,4 @@
+use anyhow::anyhow;
 use serde::{Deserialize, Serialize};
 use serde_bytes::ByteBuf;
 
@@ -18,18 +19,13 @@ pub struct TrackerResponse {
 }
 
 impl TrackerRequest {
-    pub async fn get(&self, url: &str, info_hash: &str) -> TrackerResponse {
+    pub async fn get(&self, url: &str, info_hash: &str) -> Result<TrackerResponse, anyhow::Error> {
         let params = serde_urlencoded::to_string(&self).unwrap();
         let tracker_url = format!("{}?info_hash={}&{}", url, info_hash, params);
 
-        let response = reqwest::get(&tracker_url)
-            .await
-            .unwrap()
-            .bytes()
-            .await
-            .unwrap();
+        let response = reqwest::get(&tracker_url).await?.bytes().await?;
+        let response: TrackerResponse = serde_bencode::from_bytes(&response)?;
 
-        let response: TrackerResponse = serde_bencode::from_bytes(&response).unwrap();
-        response
+        anyhow::Ok(response)
     }
 }
