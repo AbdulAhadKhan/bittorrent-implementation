@@ -1,5 +1,7 @@
 use bittorrent_starter_rust::bencode::decode_bencoded_value;
 use bittorrent_starter_rust::torrent::Torrent;
+use bittorrent_starter_rust::tracker::TrackerRequest;
+use bittorrent_starter_rust::utils::{byte_url_encode, generate_uuid};
 use clap::Parser;
 
 #[derive(Parser, Debug)]
@@ -7,6 +9,7 @@ use clap::Parser;
 enum Args {
     Decode { bencode: String },
     Info { torrent_file: String },
+    Peers { torrent_file: String },
 }
 
 fn request_bencode_decode(encoded_value: &str) {
@@ -31,8 +34,36 @@ fn request_torrent_info(path: &str) {
     }
 }
 
-// Usage: your_bittorrent.sh decode "<encoded_value>"
-fn main() {
+async fn request_peers_info(torrent_file: &str) {
+    let peer_id = generate_uuid();
+    let torrent_info = Torrent::new(torrent_file).unwrap();
+
+    let announce_url = &torrent_info.announce;
+    let info_hash = torrent_info.get_info_hash();
+
+    let tracker_request = TrackerRequest {
+        compact: 1,
+        downloaded: 0,
+        left: torrent_info.info.length,
+        peer_id,
+        port: 6881,
+        uploaded: 0,
+    };
+
+    let tracker_response = tracker_request
+        .get(announce_url, byte_url_encode(&info_hash).as_str())
+        .await
+        .unwrap();
+
+    let addresses = tracker_response.get_peers_address().unwrap();
+
+    for (ip, port) in addresses {
+        println!("{}:{}", ip, port);
+    }
+}
+
+#[tokio::main]
+async fn main() {
     let arg = Args::parse();
 
     match &arg {
@@ -41,6 +72,9 @@ fn main() {
         }
         Args::Info { torrent_file } => {
             request_torrent_info(torrent_file);
+        }
+        Args::Peers { torrent_file } => {
+            request_peers_info(torrent_file).await;
         }
     }
 }
