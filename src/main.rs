@@ -34,7 +34,7 @@ fn request_torrent_info(path: &str) {
     }
 }
 
-fn request_peers_info(torrent_file: &str) {
+async fn request_peers_info(torrent_file: &str) {
     let peer_id = generate_uuid();
     let torrent_info = Torrent::new(torrent_file).unwrap();
 
@@ -42,7 +42,6 @@ fn request_peers_info(torrent_file: &str) {
     let info_hash = torrent_info.get_info_hash();
 
     let tracker_request = TrackerRequest {
-        info_hash: byte_url_encode(&info_hash),
         compact: 1,
         downloaded: 0,
         left: torrent_info.info.length,
@@ -51,11 +50,13 @@ fn request_peers_info(torrent_file: &str) {
         uploaded: 0,
     };
 
-    tracker_request.get(announce_url);
+    tracker_request
+        .get(announce_url, byte_url_encode(&info_hash).as_str())
+        .await;
 }
 
-// Usage: your_bittorrent.sh decode "<encoded_value>"
-fn main() {
+#[tokio::main]
+async fn main() {
     let arg = Args::parse();
 
     match &arg {
@@ -66,7 +67,7 @@ fn main() {
             request_torrent_info(torrent_file);
         }
         Args::Peers { torrent_file } => {
-            request_peers_info(torrent_file);
+            request_peers_info(torrent_file).await;
         }
     }
 }
