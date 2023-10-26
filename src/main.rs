@@ -45,8 +45,10 @@ fn request_torrent_info(path: &str) {
     }
 }
 
-async fn request_peers_info(torrent_file: &str) -> Result<tracker::AddressList, anyhow::Error> {
-    let peer_id = generate_uuid();
+async fn request_peers_info(
+    torrent_file: &str,
+    peer_id: &str,
+) -> Result<tracker::AddressList, anyhow::Error> {
     let torrent_info = Torrent::new(torrent_file)?;
 
     let announce_url = &torrent_info.announce;
@@ -56,13 +58,12 @@ async fn request_peers_info(torrent_file: &str) -> Result<tracker::AddressList, 
         compact: 1,
         downloaded: 0,
         left: torrent_info.info.length,
-        peer_id,
         port: 6881,
         uploaded: 0,
     };
 
     let tracker_response = tracker_request
-        .get(announce_url, byte_url_encode(&info_hash).as_str())
+        .get(announce_url, byte_url_encode(&info_hash).as_str(), peer_id)
         .await?;
 
     tracker_response.get_peers_address()
@@ -74,6 +75,7 @@ async fn request_peer_handshake(torrent_file: &str, address: &str) {}
 #[tokio::main]
 async fn main() {
     let arg = Args::parse();
+    let peer_id = utils::generate_uuid();
 
     match &arg {
         Args::Decode { bencode } => {
@@ -83,7 +85,7 @@ async fn main() {
             request_torrent_info(torrent_file);
         }
         Args::Peers { torrent_file } => {
-            let address_list = request_peers_info(torrent_file).await.unwrap();
+            let address_list = request_peers_info(torrent_file, &peer_id).await.unwrap();
 
             for (ip, port) in address_list {
                 println!("{}:{}", ip, port);
