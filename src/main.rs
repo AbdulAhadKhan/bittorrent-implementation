@@ -70,7 +70,11 @@ async fn request_peers_info(
 }
 
 #[allow(unused)]
-async fn request_peer_handshake(torrent_file: &str, address: &str) {}
+async fn request_peer_handshake(torrent_file: &str, peer_id: &str, address: &str) {
+    let torrent = Torrent::new(torrent_file).unwrap();
+    let info_hash = torrent.get_info_hash();
+    let handshake = Handshake::new(&info_hash, &peer_id);
+}
 
 #[tokio::main]
 async fn main() {
@@ -95,7 +99,7 @@ async fn main() {
             torrent_file,
             address,
         } => {
-            request_peer_handshake(torrent_file, address).await;
+            request_peer_handshake(torrent_file, &peer_id, address).await;
         }
     }
 }
