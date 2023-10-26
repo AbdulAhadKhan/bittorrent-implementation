@@ -19,7 +19,7 @@ pub struct TrackerResponse {
     pub peers: ByteBuf,
 }
 
-type AddressList = Vec<(Ipv4Addr, u16)>;
+pub type AddressList = Vec<(Ipv4Addr, u16)>;
 
 impl TrackerRequest {
     pub async fn get(&self, url: &str, info_hash: &str) -> Result<TrackerResponse, anyhow::Error> {
