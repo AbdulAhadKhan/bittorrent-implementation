@@ -28,6 +28,10 @@ impl TrackerRequest {
         peer_id: &str,
     ) -> Result<TrackerResponse, anyhow::Error> {
         let params = serde_urlencoded::to_string(&self)?;
+
+        let peer_id = peer_id.to_string();
+        let peer_id = &peer_id[..20];
+
         let tracker_url = format!(
             "{}?info_hash={}&peer_id={}&{}",
             url, info_hash, peer_id, params
