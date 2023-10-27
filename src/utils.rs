@@ -20,7 +20,7 @@ pub fn generate_uuid() -> String {
         hash = result.clone();
     }
 
-    hash[..20].to_string()
+    hash
 }
 
 pub fn byte_url_encode(byte_array: &[u8]) -> String {

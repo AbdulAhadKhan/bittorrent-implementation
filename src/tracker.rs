@@ -5,7 +5,6 @@ use std::net::Ipv4Addr;
 
 #[derive(Debug, Serialize)]
 pub struct TrackerRequest {
-    pub peer_id: String,
     pub port: u16,
     pub uploaded: u64,
     pub downloaded: u64,
@@ -19,12 +18,20 @@ pub struct TrackerResponse {
     pub peers: ByteBuf,
 }
 
-type AddressList = Vec<(Ipv4Addr, u16)>;
+pub type AddressList = Vec<(Ipv4Addr, u16)>;
 
 impl TrackerRequest {
-    pub async fn get(&self, url: &str, info_hash: &str) -> Result<TrackerResponse, anyhow::Error> {
+    pub async fn get(
+        &self,
+        url: &str,
+        info_hash: &str,
+        peer_id: &str,
+    ) -> Result<TrackerResponse, anyhow::Error> {
         let params = serde_urlencoded::to_string(&self)?;
-        let tracker_url = format!("{}?info_hash={}&{}", url, info_hash, params);
+        let tracker_url = format!(
+            "{}?info_hash={}&peer_id={}&{}",
+            url, info_hash, peer_id, params
+        );
 
         let response = reqwest::get(&tracker_url).await?.bytes().await?;
         let response: TrackerResponse = serde_bencode::from_bytes(&response)?;
