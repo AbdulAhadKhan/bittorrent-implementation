@@ -23,7 +23,8 @@ pub struct PeerProtocol {
 
 impl PeerProtocol {
     pub fn new(info_hash: [u8; 20], peer_id: &str) -> Self {
-        let peer_id: [u8; 20] = peer_id.as_bytes().try_into().unwrap();
+        let peer_id = hex::decode(peer_id).unwrap();
+        let peer_id = peer_id.try_into().unwrap();
 
         PeerProtocol {
             length: 19,
