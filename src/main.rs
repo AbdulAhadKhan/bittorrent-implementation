@@ -1,8 +1,8 @@
 use bittorrent_starter_rust::bencode::decode_bencoded_value;
-use bittorrent_starter_rust::handshake::Handshake;
+use bittorrent_starter_rust::peer::PeerProtocol;
 use bittorrent_starter_rust::torrent::Torrent;
 use bittorrent_starter_rust::tracker::{self, TrackerRequest};
-use bittorrent_starter_rust::utils::{self, byte_url_encode, generate_uuid};
+use bittorrent_starter_rust::utils::{self, byte_url_encode};
 use clap::Parser;
 
 #[derive(Parser, Debug)]
@@ -69,11 +69,13 @@ async fn request_peers_info(
     tracker_response.get_peers_address()
 }
 
-#[allow(unused)]
 async fn request_peer_handshake(torrent_file: &str, peer_id: &str, address: &str) {
     let torrent = Torrent::new(torrent_file).unwrap();
     let info_hash = torrent.get_info_hash();
-    let handshake = Handshake::new(&info_hash, &peer_id);
+    let mut peer = PeerProtocol::new(info_hash, peer_id);
+
+    peer.connect(address).await;
+    println!("Peer ID: {}", hex::encode(peer.peer_id));
 }
 
 #[tokio::main]

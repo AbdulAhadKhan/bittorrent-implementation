@@ -1,5 +1,5 @@
 pub mod bencode;
-pub mod handshake;
+pub mod peer;
 pub mod torrent;
 pub mod tracker;
 pub mod utils;
