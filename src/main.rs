@@ -21,6 +21,12 @@ enum Args {
         torrent_file: String,
         address: String,
     },
+    DownloadPiece {
+        #[arg(short)]
+        output: String,
+        torrent_file: String,
+        piece: usize,
+    },
 }
 
 fn request_bencode_decode(encoded_value: &str) {
@@ -103,5 +109,10 @@ async fn main() {
         } => {
             request_peer_handshake(torrent_file, &peer_id, address).await;
         }
+        Args::DownloadPiece {
+            output,
+            torrent_file,
+            piece,
+        } => {}
     }
 }
